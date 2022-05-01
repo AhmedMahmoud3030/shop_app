@@ -21,12 +21,33 @@ class Cart with ChangeNotifier {
     );
     return total;
   }
-  void removeItem(String productId){
+
+  void removeItem(String productId) {
     _items.remove(productId);
     notifyListeners();
   }
-  void clearCart(){
-    _items={};
+
+  void removeSingleItem(String productId) {
+    if (!_items.containsKey(productId)) {
+      return;
+    }
+    if (_items[productId].quantity > 1) {
+      _items.update(
+          productId,
+          (value) => CartItem(
+                title: value.title,
+                id: value.id,
+                price: value.price,
+                quantity: value.quantity - 1,
+              ));
+    } else {
+      _items.remove(productId);
+    }
+    notifyListeners();
+  }
+
+  void clearCart() {
+    _items = {};
     notifyListeners();
   }
 

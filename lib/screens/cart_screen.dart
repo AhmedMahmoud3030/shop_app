@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/orders.dart';
@@ -40,7 +42,7 @@ class CartScreen extends StatelessWidget {
                   ),
                   FlatButton(
                     onPressed: () {
-                      Provider.of<Orders>(context,listen: false).addOrder(
+                      Provider.of<Orders>(context, listen: false).addOrder(
                         cart.items.values.toList(),
                         cart.totalAmount,
                       );
