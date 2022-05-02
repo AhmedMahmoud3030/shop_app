@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/products.dart';
@@ -12,6 +14,7 @@ class UserProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scafold=Scaffold.of(context);
     return ListTile(
       title: Text(title),
       leading: CircleAvatar(
@@ -32,8 +35,17 @@ class UserProductItem extends StatelessWidget {
               ),
             ),
             IconButton(
-              onPressed: () {
-                Provider.of<Products>(context,listen: false).deleteProduct(id);
+              onPressed: () async {
+                try {
+                 await Provider.of<Products>(context, listen: false)
+                      .deleteProduct(id);
+                } catch (error) {
+                  scafold.showSnackBar(
+                    SnackBar(
+                      content: Text('Deleting Failed',textAlign: TextAlign.center,),
+                    ),
+                  );
+                }
               },
               icon: Icon(
                 Icons.delete_forever,
