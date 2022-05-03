@@ -7,15 +7,17 @@ import 'package:shop_app/providers/order_item.dart';
 import 'cart_item.dart';
 
 class Orders with ChangeNotifier {
-  List<OrderItem> _orders = [];
+  List<OrderItem> porders = [];
+  final String authToken;
+  Orders({this.authToken, this.porders});
 
   List<OrderItem> get orders {
-    return [..._orders];
+    return [...porders];
   }
 
   Future<void> fetchAndSetOrders() async {
     final Uri url =
-        Uri.https('shopapp-cc7bd-default-rtdb.firebaseio.com', '/orders.json');
+        Uri.parse('https://shopapp-cc7bd-default-rtdb.firebaseio.com/orders.json?auth=$authToken');
 
     try {
       final response = await http.get(url);
@@ -37,7 +39,7 @@ class Orders with ChangeNotifier {
                 quantity: e['quantity'])).toList(),
           ),
         );
-        _orders = loadedOrders.reversed.toList();
+        porders = loadedOrders.reversed.toList();
         notifyListeners();
       });
     } catch (error) {
@@ -49,7 +51,7 @@ class Orders with ChangeNotifier {
   void addOrder(List<CartItem> cartProducts, double total) async {
     final timeStamp = DateTime.now();
     final Uri url =
-        Uri.https('shopapp-cc7bd-default-rtdb.firebaseio.com', '/orders.json');
+        Uri.parse('https://shopapp-cc7bd-default-rtdb.firebaseio.com/orders.json?auth=$authToken');
     try {
       final respone = await http.post(
         url,
@@ -66,7 +68,7 @@ class Orders with ChangeNotifier {
               .toList()
         }),
       );
-      _orders.insert(
+      porders.insert(
         0,
         OrderItem(
           id: json.decode(respone.body)['name'],
