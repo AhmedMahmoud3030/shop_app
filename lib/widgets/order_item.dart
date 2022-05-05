@@ -18,29 +18,36 @@ class _OrderItemState extends State<OrderItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10),
-      child: Column(
-        children: [
-          ListTile(
-            title: Text('\$${widget.orderItem.amount.toStringAsFixed(2)}'),
-            subtitle: Text(
-              DateFormat('dd/MM/yyyy hh:mm').format(widget.orderItem.dateTime),
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 400),
+      height: _expanded ? widget.orderItem.products.length * 20.0 + 140.0 : 100,
+      child: Card(
+        margin: EdgeInsets.all(10),
+        child: Column(
+          children: [
+            ListTile(
+              title: Text('\$${widget.orderItem.amount.toStringAsFixed(2)}'),
+              subtitle: Text(
+                DateFormat('dd/MM/yyyy hh:mm')
+                    .format(widget.orderItem.dateTime),
+              ),
+              trailing: IconButton(
+                icon: _expanded
+                    ? Icon(Icons.expand_less)
+                    : Icon(Icons.expand_more),
+                onPressed: () {
+                  setState(() {
+                    _expanded = !_expanded;
+                  });
+                },
+              ),
             ),
-            trailing: IconButton(
-              icon:
-                  _expanded ? Icon(Icons.expand_less) : Icon(Icons.expand_more),
-              onPressed: () {
-                setState(() {
-                  _expanded = !_expanded;
-                });
-              },
-            ),
-          ),
-          if (_expanded)
-            Container(
+            AnimatedContainer(
+              duration: Duration(milliseconds: 400),
               padding: EdgeInsets.all(15),
-              height: min(widget.orderItem.products.length * 20.0 + 70.0, 180),
+              height: _expanded
+                  ? widget.orderItem.products.length * 20.0 + 40.0
+                  : 0,
               child: ListView.builder(
                 itemBuilder: (ctx, index) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,7 +67,8 @@ class _OrderItemState extends State<OrderItem> {
                 itemCount: widget.orderItem.products.length,
               ),
             )
-        ],
+          ],
+        ),
       ),
     );
   }

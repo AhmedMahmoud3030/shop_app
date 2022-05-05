@@ -9,21 +9,22 @@ import 'cart_item.dart';
 class Orders with ChangeNotifier {
   List<OrderItem> porders = [];
   final String authToken;
-  Orders({this.authToken, this.porders});
+  final String userId;
+  Orders(this.authToken, this.porders, this.userId);
 
   List<OrderItem> get orders {
     return [...porders];
   }
 
   Future<void> fetchAndSetOrders() async {
-    final Uri url =
-        Uri.parse('https://shopapp-cc7bd-default-rtdb.firebaseio.com/orders.json?auth=$authToken');
+    final Uri url = Uri.parse(
+        'https://shopapp-cc7bd-default-rtdb.firebaseio.com/orders/$userId.json?auth=$authToken');
 
     try {
       final response = await http.get(url);
       final extractData = json.decode(response.body) as Map<String, dynamic>;
       final List<OrderItem> loadedOrders = [];
-      if(extractData==null){
+      if (extractData == null) {
         return;
       }
       extractData.forEach((key, value) {
@@ -32,11 +33,13 @@ class Orders with ChangeNotifier {
             id: key,
             amount: value['amount'],
             dateTime: DateTime.parse(value['dateTime']),
-            products: (value['products'] as List<dynamic>).map((e) => CartItem(
-                title: e['title'],
-                id: e['id'],
-                price: e['price'],
-                quantity: e['quantity'])).toList(),
+            products: (value['products'] as List<dynamic>)
+                .map((e) => CartItem(
+                    title: e['title'],
+                    id: e['id'],
+                    price: e['price'],
+                    quantity: e['quantity']))
+                .toList(),
           ),
         );
         porders = loadedOrders.reversed.toList();
@@ -50,8 +53,8 @@ class Orders with ChangeNotifier {
 
   void addOrder(List<CartItem> cartProducts, double total) async {
     final timeStamp = DateTime.now();
-    final Uri url =
-        Uri.parse('https://shopapp-cc7bd-default-rtdb.firebaseio.com/orders.json?auth=$authToken');
+    final Uri url = Uri.parse(
+        'https://shopapp-cc7bd-default-rtdb.firebaseio.com/orders/$userId.json?auth=$authToken');
     try {
       final respone = await http.post(
         url,

@@ -44,8 +44,9 @@ class Products with ChangeNotifier {
 
   // var _showFavoritesOnly = false;
   final String authToken;
+  final String userId;
 
-  Products({this.pitems,this.authToken});
+  Products(this.authToken, this.pitems, this.userId);
 
   List<Product> get items {
     // if (_showFavoritesOnly) {
@@ -71,9 +72,11 @@ class Products with ChangeNotifier {
   //   _showFavoritesOnly = false;
   //   notifyListeners();
   // }
-  Future<void> fetchAndSetProducts() async {
-    final Uri url = Uri.parse(
-        'https://shopapp-cc7bd-default-rtdb.firebaseio.com/products.json?auth=$authToken');
+  Future<void> fetchAndSetProducts([bool filtrByUser = false]) async {
+    final filterString =
+        filtrByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+    Uri url = Uri.parse(
+        'https://shopapp-cc7bd-default-rtdb.firebaseio.com/products.json?auth=$authToken&$filterString');
 
     try {
       final response = await http.get(url);
@@ -82,15 +85,22 @@ class Products with ChangeNotifier {
       if (extractData == null) {
         return;
       }
-      extractData.forEach((key, value) {
+      url = Uri.parse(
+          'https://shopapp-cc7bd-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken');
+      final favoriteResponse = await http.get(url);
+      final favoriteData =
+          json.decode(favoriteResponse.body) as Map<String, dynamic>;
+
+      extractData.forEach((prodId, value) {
         loadedProducts.add(
           Product(
-            id: key,
+            id: prodId,
             title: value['title'],
             imageUrl: value['imageUrl'],
             description: value['description'],
             price: value['price'],
-            isFavorite: value['isFavorite'],
+            isFavorite:
+                favoriteData == null ? false : favoriteData[prodId] ?? false,
           ),
         );
         pitems = loadedProducts;
@@ -113,7 +123,7 @@ class Products with ChangeNotifier {
           'description': product.description,
           'price': product.price,
           'imageUrl': product.imageUrl,
-          'isFavorite': product.isFavorite,
+          'creatorId': userId
         }),
       );
       json.decode(response.body);
